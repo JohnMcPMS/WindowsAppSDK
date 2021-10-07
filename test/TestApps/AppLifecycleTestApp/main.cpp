@@ -47,7 +47,8 @@ bool ProtocolLaunchSucceeded(const AppActivationArguments& appArgs)
 int main()
 {
     RETURN_IF_FAILED(BootstrapInitialize());
-
+    while (!::IsDebuggerPresent())
+        ::Sleep(100); // to avoid 100% CPU load
     auto succeeded = false;
     auto args = AppInstance::GetCurrent().GetActivatedEventArgs();
     auto kind = args.Kind();
@@ -162,6 +163,15 @@ int main()
         {
             // Signal event that startuptask was activated.
             SignalPhase(c_testStartupPhaseEventName);
+            succeeded = true;
+        }
+    }
+    else if (kind == ExtendedActivationKind::Push)
+    {
+        if (args.Data() != nullptr)
+        {
+            // Signal event that the was correctly activated through push.
+            SignalPhase(c_testPushPhaseEventName);
             succeeded = true;
         }
     }
