@@ -67,4 +67,20 @@ namespace winrt::Microsoft::Windows::System::implementation
 
         return callback();
     }
+
+    PCWSTR EnvironmentVariableChangeTracker::ScopeToString() const
+    {
+        if (m_Scope == EnvironmentManager::Scope::Process)
+        {
+            return L"process";
+        }
+        else if (m_Scope == EnvironmentManager::Scope::User)
+        {
+            return L"user";
+        }
+        else
+        {
+            return L"machine";
+        }
+    }
 }

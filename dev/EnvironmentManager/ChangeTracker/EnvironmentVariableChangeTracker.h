@@ -12,6 +12,7 @@ namespace winrt::Microsoft::Windows::System::implementation
     {
         EnvironmentVariableChangeTracker(const std::wstring& key, const std::wstring& valueToSet, EnvironmentManager::Scope scope);
         HRESULT TrackChange(std::function<HRESULT(void)> callBack);
+        PCWSTR ScopeToString() const;
 
     private:
         EnvironmentManager::Scope m_Scope;
@@ -39,19 +40,8 @@ namespace winrt::Microsoft::Windows::System::implementation
 
         wil::unique_hkey GetKeyForTrackingChange(DWORD* disposition) const
         {
-            HKEY topLevelKey{};
-
-            if (m_Scope == EnvironmentManager::Scope::User)
-            {
-                topLevelKey = HKEY_CURRENT_USER;
-            }
-            else
-            {
-                topLevelKey = HKEY_LOCAL_MACHINE;
-            }
-
             auto subKey{ wil::str_printf<wil::unique_cotaskmem_string>(
-                L"Software\\ChangeTracker\\%ws\\%ws\\%ws\\", KeyName(), m_PackageFullName.c_str(), m_Key.c_str()) };
+                L"Software\\ChangeTracker\\%ws\\%ws\\%ws\\%ws\\", KeyName(), m_PackageFullName.c_str(), ScopeToString(), m_Key.c_str()) };
 
             wil::unique_hkey keyToTrackChanges{};
             THROW_IF_WIN32_ERROR(RegCreateKeyEx(HKEY_CURRENT_USER,
